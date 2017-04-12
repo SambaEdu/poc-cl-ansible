@@ -1,18 +1,24 @@
 ---
-- name: 'Linux clients Samba integration'
+- name: include settings variables
+  hosts: '{{ target | default("all") }}'
+  tasks:
+    - include_vars:
+        file: settings.yaml
+        name: settings
+
+- name: Linux clients Samba integration
   hosts: '{{ target | default("all") }}'
   vars:
-    role_ntp_servers: '{{ ntp_servers }}'
-    role_krb5_real: '{{ domain | upper }}'
-    role_sambamember_workgroup: '{{ domain.split(".")[0] | upper }}'
-    role_sambamember_realm: '{{ domain | upper }}'
-    role_sambamember_join_account: '{{ domain_admin }}'
-    role_sambamember_join_password: '{{ domain_admin_pwd }}'
+    role_ntp_servers: '{{ settings.ntp_servers }}'
+    role_krb5_real: '{{ settings.domain | upper }}'
+    role_sambamember_workgroup: '{{ settings.domain.split(".")[0] | upper }}'
+    role_sambamember_realm: '{{ settings.domain | upper }}'
+    role_sambamember_join_account: '{{ settings.domain_admin_login }}'
+    role_sambamember_join_password: '{{ settings.domain_admin_pwd }}'
     role_sambamember_autojoin: '{{ autojoin | default(True) }}'
   roles:
     - 'ntp'
     - 'krb5'
     - 'sambamember'
     - 'dm'
-
 

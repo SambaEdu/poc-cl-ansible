@@ -21,19 +21,19 @@
     - restart winbind
 - name: check if the host has well joined the domain
   shell: 'sleep 0.5 && service winbind restart && sleep 3 && wbinfo --check-secret'
-  register: has_joined
+  register: role_sambamember_has_joined
   ignore_errors: True
   failed_when: False
   changed_when: False
   when: 'role_sambamember_autojoin'
-- name: set the fact must_join
+- name: set the fact role_sambamember_must_join
   set_fact:
-    must_join: "{{ ( has_joined.rc | default(0) ) != 0 }}"
-- name: Print the value of the must_join fact
+    role_sambamember_must_join: "{{ ( role_sambamember_has_joined.rc | default(0) ) != 0 }}"
+- name: Print the value of the role_sambamember_must_join fact
   debug:
-    msg: 'value of the must_join fact: {{ must_join }}'
+    msg: 'value of the role_sambamember_must_join fact: {{ role_sambamember_must_join }}'
 - include: 'join.yaml'
-  when: "must_join"
+  when: "role_sambamember_must_join"
 - name: include winbind in /etc/nsswitch.conf for passwd
   lineinfile:
     dest: /etc/nsswitch.conf
