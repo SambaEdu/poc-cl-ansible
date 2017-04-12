@@ -1,4 +1,8 @@
 ---
+- name: check if the distribution is supported
+  assert:
+    that: 'ansible_distribution_release in role_dm_supported_distributions'
+    msg: "For this role, the distribution must be in {{ role_dm_supported_distributions }}"
 - name: ensure installation of the display manager lightdm
   apt: name=lightdm state=present install_recommends=no
 - name: ensure the presence of /etc/lightdm/lightdm.conf.d/ directory
