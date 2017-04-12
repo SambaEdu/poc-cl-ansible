@@ -10,7 +10,7 @@
   hosts: '{{ target | default("all") }}'
   vars:
     role_ntp_servers: '{{ settings.ntp_servers }}'
-    role_krb5_real: '{{ settings.domain | upper }}'
+    role_krb5_realm: '{{ settings.domain | upper }}'
     role_sambamember_workgroup: '{{ settings.domain.split(".")[0] | upper }}'
     role_sambamember_realm: '{{ settings.domain | upper }}'
     role_sambamember_join_account: '{{ settings.domain_admin_login }}'
