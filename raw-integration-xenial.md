@@ -17,13 +17,19 @@ ADM_PWD='123456' # C'est le mot de passe du compte administrateur du domaine AD.
 apt-get install -y ntp
 
 # Éventuellement modifier les serveurs NTP de référence pour
-# requêter une machine du réseau local (le serveur Samba
-# lui-même par exemple).
+# requêter une machine du réseau local qui fait office de
+# serveur de temps (le serveur Samba lui-même ou le serveur
+# AMON par exemples).
 vim /etc/ntp.conf && service ntp restart
 
 # Ce démon ne sert à rien et peut mettre la pagaille, on le vire.
-apt-get purge -y avahi-daemon
+# Mauvaise idée au niveau des dépendances de paquets. On laisse.
+# apt-get purge -y avahi-daemon
 
+# Vérification à faire, normalement le fichier devrait être
+# OK après l'installation (typiquement via la configuration
+# DHCP).
+#
 # Au niveau de la configuration réseau, le serveur DNS doit
 # être impérativement le serveur Samba4. On peut peut-être
 # considérer que c'est d'office le cas (via le configuration
