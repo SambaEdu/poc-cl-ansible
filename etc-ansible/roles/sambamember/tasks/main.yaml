@@ -10,6 +10,7 @@
     - samba-dsdb-modules
     - winbind
     - libnss-winbind
+    - cifs-utils
 - name: ensure that smbd and nmbd are stopped and disabled
   service: name={{ item }} state=stopped enabled=no
   with_items:
