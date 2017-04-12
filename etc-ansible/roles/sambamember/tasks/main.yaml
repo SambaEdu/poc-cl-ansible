@@ -1,0 +1,52 @@
+---
+- name: check if the distribution is supported
+  assert:
+    that: 'ansible_distribution_release in role_sambamember_supported_distributions'
+    msg: "For this role, the distribution must be in {{ role_sambamember_supported_distributions }}"
+- name: ensure installation of samba packages
+  apt: name={{ item }} state=present install_recommends=no
+  with_items:
+    - samba
+    - samba-dsdb-modules
+    - winbind
+    - libnss-winbind
+- name: ensure that smbd and nmbd are stopped and disabled
+  service: name={{ item }} state=stopped enabled=no
+  with_items:
+    - smbd
+    - nmbd
+- name: write the config /etc/samba/smb.conf
+  template: src=smb.conf.j2 dest=/etc/samba/smb.conf owner=root group=root mode='0644'
+  notify:
+    - restart winbind
+- name: check if the host has well joined the domain
+  shell: 'sleep 0.5 && service winbind restart && sleep 3 && wbinfo --check-secret'
+  register: has_joined
+  ignore_errors: True
+  failed_when: False
+  changed_when: False
+  when: 'role_sambamember_autojoin'
+- name: set the fact must_join
+  set_fact:
+    must_join: "{{ ( has_joined.rc | default(0) ) != 0 }}"
+- name: Print the value of the must_join fact
+  debug:
+    msg: 'value of the must_join fact: {{ must_join }}'
+- include: 'join.yaml'
+  when: "must_join"
+- name: include winbind in /etc/nsswitch.conf for passwd
+  lineinfile:
+    dest: /etc/nsswitch.conf
+    regexp: '^passwd:'
+    line: 'passwd:         compat winbind'
+- name: include winbind in /etc/nsswitch.conf for group
+  lineinfile:
+    dest: /etc/nsswitch.conf
+    regexp: '^group:'
+    line: 'group:          compat winbind'
+- name: force the restart of winbind now if needed
+  meta: flush_handlers
+- name: ensure winbind service is running and enabled
+  service: name=winbind state=started enabled=yes
+
+

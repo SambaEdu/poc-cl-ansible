@@ -1,0 +1,14 @@
+---
+role_sambamember_workgroup: '{{ ansible_domain.split(".")[0] | upper }}'
+role_sambamember_realm: '{{ ansible_domain | upper }}'
+role_sambamember_default_range_min: 2000
+role_sambamember_default_range_max: 9999
+role_sambamember_domain_range_min: 10000
+role_sambamember_domain_range_max: 9000000
+role_sambamember_join_account: 'Administrator'
+# role_sambamember_join_password: no default value
+role_sambamember_autojoin: False
+role_sambamember_supported_distributions:
+  - 'xenial'
+  - 'stretch'
+

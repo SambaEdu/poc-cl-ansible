@@ -1,0 +1,18 @@
+---
+- name: 'Linux clients Samba integration'
+  hosts: '{{ target | default("all") }}'
+  vars:
+    role_ntp_servers: '{{ ntp_servers }}'
+    role_krb5_real: '{{ domain | upper }}'
+    role_sambamember_workgroup: '{{ domain.split(".")[0] | upper }}'
+    role_sambamember_realm: '{{ domain | upper }}'
+    role_sambamember_join_account: '{{ domain_admin }}'
+    role_sambamember_join_password: '{{ domain_admin_pwd }}'
+    role_sambamember_autojoin: '{{ autojoin | default(True) }}'
+  roles:
+    - 'ntp'
+    - 'krb5'
+    - 'sambamember'
+    - 'dm'
+
+

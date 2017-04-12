@@ -1,0 +1,8 @@
+---
+role_krb5_realm: '{{ ansible_domain | upper }}'
+role_krb5_ticket_lifetime: '18h'
+role_krb5_supported_distributions:
+  - 'xenial'
+  - 'stretch'
+
+

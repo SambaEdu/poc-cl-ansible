@@ -1,0 +1,17 @@
+---
+- name: ensure installation of the display manager lightdm
+  apt: name=lightdm state=present install_recommends=no
+- name: ensure the presence of /etc/lightdm/lightdm.conf.d/ directory
+  file: path=/etc/lightdm/lightdm.conf.d state=directory mode='0755'
+- name: write the config /etc/lightdm/lightdm.conf.d/custom.conf
+  template: src=lightdm.conf.j2 dest=/etc/lightdm/lightdm.conf.d/custom.conf owner=root group=root mode='0644'
+  # Not required because a reboot will be necessary.
+  #notify:
+  #  - restart lightdm
+- name: set the lightdm as default display manager
+  copy: content="/usr/sbin/lightdm\n" dest=/etc/X11/default-display-manager
+# Not required because a reboot will be necessary.
+#- name: ensure lightdm service is running and enabled
+#  service: name=lightdm state=started enabled=yes
+
+

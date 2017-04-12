@@ -1,0 +1,52 @@
+### This file is managed by Ansible, don't edit it manually. ###
+
+[global]
+    security  = ADS
+    workgroup = {{ role_sambamember_workgroup }}
+    realm     = {{ role_sambamember_realm }}
+    log file  = /var/log/samba/%m.log
+    log level = 1
+
+    # Default ID mapping configuration for local BUILTIN accounts
+    # and groups on a domain member. The default (*) domain is
+    # mandatory and:
+    # - must not overlap with any domain ID mapping configuration!
+    # - must use an read-write-enabled back end, such as tdb.
+    #
+    # Warning: the ranges of all backends must not overlap.
+    #
+    idmap config * : backend = tdb
+    idmap config * : range   = {{ role_sambamember_default_range_min }}-{{ role_sambamember_default_range_max }}
+
+    # To retrieve ID mapping _from_ the domain {{ role_sambamember_workgroup }} (on the DC).
+    idmap config {{ role_sambamember_workgroup }} : backend     = ad
+    idmap config {{ role_sambamember_workgroup }} : range       = {{ role_sambamember_domain_range_min }}-{{ role_sambamember_domain_range_max }}
+    idmap config {{ role_sambamember_workgroup }} : schema_mode = rfc2307
+
+    # To retrieve homedir, shell etc. from the AD.
+    # But it will be:
+    #
+    #       idmap config {{ role_sambamember_workgroup }}:unix_nss_info = yes
+    #
+    # On Samba 4.6 and later.
+    #
+    winbind nss info = rfc2307
+
+    # The default value (one week) seems to me too big.
+    idmap cache time = 7200
+
+    # To avoid "{{ role_sambamember_workgroup }}\user" in the output of "getent
+    # passwd user" and have just "user".
+    winbind use default domain = yes
+
+    # Good for tests, but not relevant on production
+    # because of performance.
+    #winbind enum users  = yes
+    #winbind enum groups = yes
+
+    winbind separator = /
+    domain master     = no
+    local master      = no
+    disable netbios   = no
+
+

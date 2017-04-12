@@ -1,0 +1,10 @@
+### This file is managed by Ansible, don't edit it manually. ###
+
+[libdefaults]
+    default_realm    = {{ role_krb5_realm }}
+    dns_lookup_realm = false
+    dns_lookup_kdc   = true
+    ticket_lifetime  = {{ role_krb5_ticket_lifetime }}
+    clockskew        = 300
+
+

@@ -1,0 +1,8 @@
+---
+domain: 'athome.priv'
+ntp_servers:
+  - '192.168.0.220'
+domain_admin: 'Administrator'
+domain_admin_pwd: 'Administrator@123'
+
+
