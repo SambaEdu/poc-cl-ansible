@@ -1,5 +1,7 @@
 ---
 - name: restart lightdm
-  service: name=lightdm state=restarted
+  service:
+    name: lightdm
+    state: restarted
 
 
