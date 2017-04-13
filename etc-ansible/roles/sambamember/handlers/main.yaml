@@ -1,5 +1,7 @@
 ---
 - name: restart winbind
-  service: name=winbind state=restarted
+  service:
+    name: winbind
+    state: restarted
 
 

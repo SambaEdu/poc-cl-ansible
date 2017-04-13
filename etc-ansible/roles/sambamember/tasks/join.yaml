@@ -1,9 +1,13 @@
 ---
 - name: stop winbind before joining the domain
-  service: name=winbind state=stopped
+  service:
+    name: winbind
+    state: stopped
+
 - name: cleaning of samba data before joining the domain
-  shell: "find /var/lib/samba/ '(' -name '*.tdb' -o -name '*.ldb' ')' -delete"
-- name: Join the domain
-  shell: "net ads join -U {{ role_sambamember_join_account }}%'{{ role_sambamember_join_password }}'"
+  shell: find /var/lib/samba/ '(' -name '*.tdb' -o -name '*.ldb' ')' -delete
+
+- name: join the domain
+  shell: net ads join -U {{ role_sambamember_join_account }}%'{{ role_sambamember_join_password }}'
 
 
