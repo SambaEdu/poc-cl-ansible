@@ -50,7 +50,7 @@
 
 - name: Print the value of the role_sambamember_must_join fact
   debug:
-    msg: value of the role_sambamember_must_join fact: {{ role_sambamember_must_join }}
+    msg: 'value of the role_sambamember_must_join fact: {{ role_sambamember_must_join }}'
 
 - include: join.yaml
   when: role_sambamember_must_join
