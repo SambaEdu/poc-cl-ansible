@@ -1,14 +1,29 @@
 ---
 - name: check if the distribution is supported
   assert:
-    that: 'ansible_distribution_release in role_ntp_supported_distributions'
-    msg: "For this role, the distribution must be in {{ role_ntp_supported_distributions }}"
+    that: ansible_distribution_release in role_ntp_supported_distributions
+    msg: For this role, the distribution must be in {{ role_ntp_supported_distributions }}
+
 - name: ensure NTP installation
-  apt: name=ntp state=present install_recommends=no
+  apt:
+    name: ntp
+    state: present
+    install_recommends: no
+
 - name: write NTP config file /etc/ntp.conf
-  template: src=ntp.conf.j2 dest=/etc/ntp.conf owner=root group=root mode='0644'
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: '0644'
   notify:
     - restart ntp
+
 - name: ensure ntp service is running and enabled
-  service: name=ntp state=started enabled=yes
+  service:
+    name: ntp
+    state: started
+    enabled: yes
+
 
