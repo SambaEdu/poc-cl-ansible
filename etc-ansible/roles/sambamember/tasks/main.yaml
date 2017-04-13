@@ -11,6 +11,7 @@
     - winbind
     - libnss-winbind
     - cifs-utils
+    - keyutils # Required to mount shares with "mount.cifs" via Kerberos authentication.
 - name: ensure that smbd and nmbd are stopped and disabled
   service: name={{ item }} state=stopped enabled=no
   with_items:
