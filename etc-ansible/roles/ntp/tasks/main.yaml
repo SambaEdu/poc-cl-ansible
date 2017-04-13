@@ -20,6 +20,9 @@
   notify:
     - restart ntp
 
+- name: force the restart of ntp now if needed
+  meta: flush_handlers
+
 - name: ensure ntp service is running and enabled
   service:
     name: ntp
