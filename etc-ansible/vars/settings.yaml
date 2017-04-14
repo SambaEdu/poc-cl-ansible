@@ -1,4 +1,8 @@
 ---
+# The data which describe the Sambaedu environment. These
+# data must remain an _abstraction_ _layer_ independent of
+# the role variables.
+
 network:
   domain: 'athome.priv'
   ntp_servers:

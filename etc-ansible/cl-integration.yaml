@@ -6,23 +6,24 @@
         file: settings.yaml
         name: settings
 
+- name: include roles variables
+  hosts: '{{ target | default("all") }}'
+  tasks:
+    - include_vars:
+        file: cl-roles-vars.yaml
+
 - name: Linux clients Samba integration
   hosts: '{{ target | default("all") }}'
   vars:
-    role_ntp_servers: '{{ settings.network.ntp_servers }}'
-    role_krb5_realm: '{{ settings.network.domain | upper }}'
-    role_sambamember_workgroup: '{{ settings.network.domain.split(".")[0] | upper }}'
-    role_sambamember_realm: '{{ settings.network.domain | upper }}'
-    role_sambamember_join_account: '{{ settings.samba.admin.login }}'
-    role_sambamember_join_password: '{{ settings.samba.admin.pwd }}'
+    # This special role variable can be redefined by command line.
     role_sambamember_autojoin: '{{ autojoin | default(False) }}'
-    #
+    # The reboot step is settable by command line.
     really_reboot: '{{ reboot | default(False) }}'
   roles:
     - 'ntp'
     - 'krb5'
     - 'sambamember'
     - 'dm'
-    - { role: reboot, when: really_reboot  } # Must the last included role.
+    - { role: reboot, when: really_reboot  } # Must the last role included.
 
 

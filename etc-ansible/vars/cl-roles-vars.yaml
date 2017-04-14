@@ -1,0 +1,15 @@
+---
+# Assignments of roles variables for all roles used by Linux
+# clients. These assignments can use the data from the
+# "settings" variables.
+
+role_ntp_servers: '{{ settings.network.ntp_servers }}'
+
+role_krb5_realm: '{{ settings.network.domain | upper }}'
+
+role_sambamember_workgroup: '{{ settings.network.domain.split(".")[0] | upper }}'
+role_sambamember_realm: '{{ settings.network.domain | upper }}'
+role_sambamember_join_account: '{{ settings.samba.admin.login }}'
+role_sambamember_join_password: '{{ settings.samba.admin.pwd }}'
+
+
