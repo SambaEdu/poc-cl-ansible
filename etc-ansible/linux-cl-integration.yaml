@@ -23,6 +23,6 @@
     - 'krb5'
     - 'sambamember'
     - 'dm'
-    - { role: reboot, when: really_reboot  }
+    - { role: reboot, when: really_reboot  } # Must the last included role.
 
 
