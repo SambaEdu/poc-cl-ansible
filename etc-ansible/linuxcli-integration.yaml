@@ -10,7 +10,7 @@
   hosts: '{{ target | default("all") }}'
   tasks:
     - include_vars:
-        file: cl-roles-vars.yaml
+        file: linuxcli-roles.yaml
 
 - name: Linux clients Samba integration
   hosts: '{{ target | default("all") }}'
