@@ -1,4 +1,9 @@
 ---
+- name: check if the distribution is supported
+  assert:
+    that: ansible_distribution_release in role_reboot_supported_distributions
+    msg: For this role, the distribution must be in {{ role_reboot_supported_distributions }}
+
 - name: put the temporary script used to reboot the OS
   template:
     src: reboot.sh.j2

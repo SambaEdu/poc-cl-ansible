@@ -24,4 +24,9 @@ role_reboot_script_path: /usr/local/sbin/reboot.sh
 # and just use its default value.
 role_reboot_cron_path: /etc/cron.d/reboot-temp-ansible
 
+# Distributions tested and supported by this role.
+role_reboot_supported_distributions:
+  - 'xenial'
+  - 'stretch'
+
 
