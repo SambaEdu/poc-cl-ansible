@@ -1,4 +1,5 @@
 ---
+# Distributions tested and supported by this role.
 role_dm_supported_distributions:
   - 'xenial'
   - 'stretch'

@@ -1,13 +1,50 @@
 ---
-role_sambamember_workgroup: '{{ ansible_domain.split(".")[0] | upper }}'
+# Name of the default AD Kerberos realm. The string must be
+# in uppercase. For instance "MYDOMAIN.TLD".
 role_sambamember_realm: '{{ ansible_domain | upper }}'
+
+# The workgroup of the AD member server. The string must be
+# in uppercase. For instance, the default realm is
+# "MYDOMAIN.TLD" the workgroup should be "MYDOMAIN".
+role_sambamember_workgroup: '{{ ansible_domain.split(".")[0] | upper }}'
+
+# The ID mapping range of the defaults domains (used for
+# instance for the special BUILTIN local domain of a samba
+# server). Normally, you should never change these default
+# values below.
 role_sambamember_default_range_min: 2000
 role_sambamember_default_range_max: 4999
+
+# The ID mapping range of the AD domain. Normally, you
+# should never change these default values below. Warning,
+# all the ranges must not overlap!
 role_sambamember_domain_range_min: 5000
 role_sambamember_domain_range_max: 9000000
+
+# The login of the AD account used to join the AD domain.
 role_sambamember_join_account: 'Administrator'
-# role_sambamember_join_password: no default value
+
+# The password of the AD account used to join the AD domain.
+# There is no default value for this variable which must be
+# provided explicitly in the playbook, unless the variable
+# role_sambamember_autojoin (see below) is set to `False`.
+#
+#role_sambamember_join_password: 'XXXXXXXXXX12345678990' # <== WARNING: No default value for this variable.
+
+# If the variable below is set to True, the role will
+# attempt to join the AD domain. If set to False (the
+# default value), the role will manage the Samba
+# configuration but no attempt to join the AD domain will be
+# tried.
+#
+# Indeed, the command to check if the host has already
+# joined the AD domain is slow (few seconds). So it's better
+# to set this variable to True only during the first run of
+# the playbook when the host has not already joined the
+# domain, and let this variable to False for the next runs.
 role_sambamember_autojoin: False
+
+# Distributions tested and supported by this role.
 role_sambamember_supported_distributions:
   - 'xenial'
   - 'stretch'

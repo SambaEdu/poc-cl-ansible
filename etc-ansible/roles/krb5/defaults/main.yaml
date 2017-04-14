@@ -1,6 +1,12 @@
 ---
+# Name of the default Kerberos realm. The string must be in
+# uppercase.
 role_krb5_realm: '{{ ansible_domain | upper }}'
+
+# The default Kerberos ticket lifetime.
 role_krb5_ticket_lifetime: '18h'
+
+# Distributions tested and supported by this role.
 role_krb5_supported_distributions:
   - 'xenial'
   - 'stretch'

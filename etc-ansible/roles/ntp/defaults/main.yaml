@@ -1,8 +1,11 @@
 ---
+# An array of strings to define the reference clock servers.
 role_ntp_servers:
   - '0.debian.pool.ntp.org'
   - '1.debian.pool.ntp.org'
   - '2.debian.pool.ntp.org'
+
+# Distributions tested and supported by this role.
 role_ntp_supported_distributions:
   - 'xenial'
   - 'stretch'
