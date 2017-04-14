@@ -1,0 +1,27 @@
+---
+# This role just reboots the OS. Of course, this role will
+# have to be included last in a playbook.
+
+# The reboot is triggered by a temporary cron task. When the
+# cron task starts, a random sleep is run before the reboot
+# command to avoid several reboots of machines exactly at
+# the same time.
+#
+# Normally, you shouldn't change the value of this variable
+# and just use its default value.
+role_reboot_sleep: '{{ 60 | random }}'
+
+# The path of the script which runs the reboot.
+#
+# Normally, you shouldn't change the value of this variable
+# and just use its default value.
+role_reboot_script_path: /usr/local/sbin/reboot.sh
+
+# The path of the cron task which triggers the reboot
+# script.
+#
+# Normally, you shouldn't change the value of this variable
+# and just use its default value.
+role_reboot_cron_path: /etc/cron.d/reboot-temp-ansible
+
+

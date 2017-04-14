@@ -1,0 +1,18 @@
+---
+- name: put the temporary script used to reboot the OS
+  template:
+    src: reboot.sh.j2
+    dest: '{{ role_reboot_script_path }}'
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: put the cron task which will reboot the OS
+  template:
+    src: cron-reboot.j2
+    dest: '{{ role_reboot_cron_path }}'
+    owner: root
+    group: root
+    mode: '0644'
+
+

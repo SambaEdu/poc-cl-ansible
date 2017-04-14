@@ -1,0 +1,21 @@
+#!/bin/sh
+
+### This file is managed by Ansible, don't edit it manually. ###
+
+export PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+# Cleaning of the cron task.
+rm -f '{{ role_reboot_cron_path }}'
+
+# Cleaning of the current script.
+rm -f '{{ role_reboot_script_path }}'
+
+# Trigger a reboot.
+{
+    sleep {{ role_reboot_sleep }}
+    reboot
+} &
+
+exit 0
+
+
