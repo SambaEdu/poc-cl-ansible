@@ -1,7 +1,7 @@
 ---
 # Assignments of roles variables for all roles used by Linux
 # clients. These assignments can use the data from the
-# "settings" variables.
+# "settings" variable.
 
 role_ntp_servers: '{{ settings.network.ntp_servers }}'
 
