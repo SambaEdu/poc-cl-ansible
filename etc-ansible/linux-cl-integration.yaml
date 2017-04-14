@@ -15,7 +15,7 @@
     role_sambamember_realm: '{{ settings.domain | upper }}'
     role_sambamember_join_account: '{{ settings.domain_admin_login }}'
     role_sambamember_join_password: '{{ settings.domain_admin_pwd }}'
-    role_sambamember_autojoin: '{{ autojoin | default(True) }}'
+    role_sambamember_autojoin: '{{ autojoin | default(False) }}'
     #
     reboot: '{{ reboot | default(False) }}'
   roles:
