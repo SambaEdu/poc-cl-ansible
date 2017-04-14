@@ -17,12 +17,12 @@
     role_sambamember_join_password: '{{ settings.domain_admin_pwd }}'
     role_sambamember_autojoin: '{{ autojoin | default(False) }}'
     #
-    reboot: '{{ reboot | default(False) }}'
+    really_reboot: '{{ reboot | default(False) }}'
   roles:
     - 'ntp'
     - 'krb5'
     - 'sambamember'
     - 'dm'
-    - { role: reboot, when: reboot  }
+    - { role: reboot, when: really_reboot  }
 
 
