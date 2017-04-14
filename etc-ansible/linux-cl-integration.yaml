@@ -9,12 +9,12 @@
 - name: Linux clients Samba integration
   hosts: '{{ target | default("all") }}'
   vars:
-    role_ntp_servers: '{{ settings.ntp_servers }}'
-    role_krb5_realm: '{{ settings.domain | upper }}'
-    role_sambamember_workgroup: '{{ settings.domain.split(".")[0] | upper }}'
-    role_sambamember_realm: '{{ settings.domain | upper }}'
-    role_sambamember_join_account: '{{ settings.domain_admin_login }}'
-    role_sambamember_join_password: '{{ settings.domain_admin_pwd }}'
+    role_ntp_servers: '{{ settings.network.ntp_servers }}'
+    role_krb5_realm: '{{ settings.network.domain | upper }}'
+    role_sambamember_workgroup: '{{ settings.network.domain.split(".")[0] | upper }}'
+    role_sambamember_realm: '{{ settings.network.domain | upper }}'
+    role_sambamember_join_account: '{{ settings.samba.admin.login }}'
+    role_sambamember_join_password: '{{ settings.samba.admin.pwd }}'
     role_sambamember_autojoin: '{{ autojoin | default(False) }}'
     #
     really_reboot: '{{ reboot | default(False) }}'
