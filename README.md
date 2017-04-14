@@ -48,7 +48,10 @@ Proposition :
   fichier `roles/<nom-du-rôle>/defaults/main.yaml` soit avec
   une valeur par défaut générique quand c'est pertinent et soit
   de manière commentée quand il n'y a pas de valeur par défaut
-  pertinente.
+  pertinente. Chaque variable, commentée ou non, devrait être
+  accompagnée d'une description (en anglais please :)) de sorte
+  que **le fichier `roles/<nom-du-rôle>/default/main.yalm` sera
+  le mode d'emploi du rôle**.
 
 * Pour chaque rôle, placer une task initiale qui teste la version
   de la distribution pour voir si elle matche avec les versions de
