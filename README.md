@@ -57,7 +57,7 @@ Proposition :
   de la distribution pour voir si elle matche avec les versions de
   distributions supportées par le rôle.
 
-* Si jamais une task lance une commande (soit via les modules
+* Si jamais une task lance une commande (via les modules
   Ansible `shell` ou `command`) et que cette commande est amenée
   à contenir des données sensibles (comme typiquement un mot
   de passe), mettre impérativement `no_log: True` dans la task
