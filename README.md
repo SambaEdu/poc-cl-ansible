@@ -57,6 +57,13 @@ Proposition :
   de la distribution pour voir si elle matche avec les versions de
   distributions supportées par le rôle.
 
+* Si jamais une task lance une commande (soit via les modules
+  Ansible `shell` ou `command`) et que cette commande est amenée
+  à contenir des données sensibles (comme typiquement un mot
+  de passe), mettre impérativement `no_log: True` dans la task
+  afin que la commande (avec son mot de passe etc.) ne soit
+  pas logguée en clair dans le fichier `syslog` des machines
+  cibles.
 
 # Comment monter un partage avec Kerberos
 
