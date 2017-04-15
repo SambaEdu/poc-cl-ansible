@@ -1,6 +1,6 @@
 ---
-# This role just reboots the OS. Of course, this role will
-# have to be included last in a playbook.
+# This role just reboots the OS. Of course, this role must
+# to be included last in a playbook.
 
 # The reboot is triggered by a temporary cron task. When the
 # cron task starts, a random sleep is run before the reboot
