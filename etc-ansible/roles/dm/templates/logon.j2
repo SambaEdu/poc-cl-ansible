@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# This file is managed by Ansible. Don't edit manually.
+
+STAGE="$1"
+
+case "$STAGE" in
+
+    init)
+        exit 0
+    ;;
+
+    logon)
+        mkdir "/home/$USER"
+        chown "$USER:" "/home/$USER"
+        chmod -R 700 "/home/$USER"
+    exit 0
+    ;;
+
+    logoff)
+        rm -rf --one-file-system "/home/$USER"
+    exit 0
+    ;;
+
+    *)
+        exit 1
+    ;;
+
+esac
+
+

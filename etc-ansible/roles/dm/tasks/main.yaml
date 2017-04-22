@@ -4,6 +4,14 @@
     that: ansible_distribution_release in role_dm_supported_distributions
     msg: For this role, the distribution must be in {{ role_dm_supported_distributions }}
 
+- name: copy logon script 
+  template:
+    src: logon.j2
+    dest: /usr/local/sbin/logon
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: ensure installation of the display manager lightdm
   apt:
     name: lightdm
@@ -24,8 +32,8 @@
     group: root
     mode: '0644'
   # Not required because a reboot will be necessary.
-  #notify:
-  #  - restart lightdm
+  notify:
+    - restart lightdm
 
 - name: set the lightdm as default display manager
   copy:
@@ -33,10 +41,10 @@
     dest: /etc/X11/default-display-manager
 
 # Not required because a reboot will be necessary.
-#- name: ensure lightdm service is running and enabled
-#  service:
-#    name: lightdm
-#    state: started
-#    enabled: yes
+- name: ensure lightdm service is running and enabled
+  service:
+    name: lightdm
+    state: started
+    enabled: yes
 
 

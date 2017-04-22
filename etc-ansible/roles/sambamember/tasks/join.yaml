@@ -9,6 +9,6 @@
 
 - name: join the domain
   shell: net ads join -U {{ role_sambamember_join_account }}%'{{ role_sambamember_join_password }}'
-  no_log: True
+#  no_log: True
 
 
