@@ -2,7 +2,15 @@
 
 # This file is managed by Ansible. Don't edit manually.
 
+exec >> /tmp/log 2>&1
+set -x
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 STAGE="$1"
+
+echo "$STAGE"
+env
+echo
 
 case "$STAGE" in
 
@@ -14,6 +22,12 @@ case "$STAGE" in
         mkdir "/home/$USER"
         chown "$USER:" "/home/$USER"
         chmod -R 700 "/home/$USER"
+
+	# On récupère le nom de fichier du ticket Kerberos de toto.
+	KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$USER")
+	
+	KRB5CCNAME="$KRB5CCNAME" mount.cifs //{{ role_dm_samba_fqdn }}/myhome /mnt/ \
+		-o username="$USER",domain={{ role_dm_samba_domain }},sec=krb5i,cruid="$USER"
     exit 0
     ;;
 

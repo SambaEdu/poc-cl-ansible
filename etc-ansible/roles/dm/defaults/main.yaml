@@ -1,7 +1,12 @@
 ---
+# 
+role_dm_samba_fqdn: samba.{{ ansible_domain }}
+role_dm_samba_domain: '{{ ansible_domain }}'
+
 # Distributions tested and supported by this role.
 role_dm_supported_distributions:
   - 'xenial'
   - 'stretch'
+
 
 

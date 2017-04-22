@@ -12,5 +12,5 @@ samba:
   admin:
     login: 'Administrator'
     pwd: 'Administrator@123'
-
+  fqdn: 'samba.athome.priv'
 

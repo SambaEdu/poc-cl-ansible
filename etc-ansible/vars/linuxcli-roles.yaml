@@ -12,4 +12,5 @@ role_sambamember_realm: '{{ settings.network.domain | upper }}'
 role_sambamember_join_account: '{{ settings.samba.admin.login }}'
 role_sambamember_join_password: '{{ settings.samba.admin.pwd }}'
 
-
+role_dm_samba_fqdn: '{{ settings.samba.fqdn }}'
+role_dm_samba_domain: '{{ settings.network.domain }}'
