@@ -1,16 +1,25 @@
 ---
-# An array of strings to define the name of Samba shares
+# An array of strings to define Samba shares with following scheme :
+# - user: name of user autorized to access to this share (put '*' for all users)
+#   group : only users of this group will be autorized to access this share
+#   path: the name of se4 samba share
+#   mountpoint: the name of repository in ~/ where samba share will be mounted (automatically created if not existed)
+
+# Two examples given :
+# - the first autorizes (only) 'toto' user of group 'domusers' to mount se4 share named 'netlogon' in '~/netlogon-linux'
+# - the seconde autorizes all users of group 'domusers' to mount se4 share named 'myhome' in '~/Docs'
 role_pammount_share:
   - user: toto
     group: domusers
     path: netlogon
-    mountpoint: netlogon
-    
-  - user: toto
+    mountpoint: netlogon-linux
+
+  - user: '*'
     group: domusers
     path: myhome
-    mountpoint: myhome
+    mountpoint: Docs
 
+# FQDN of se4
 role_pammount_fqdn: '{{ settings.samba.fqdn }}'
 
 # Distributions tested and supported by this role.
