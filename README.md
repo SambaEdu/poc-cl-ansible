@@ -93,6 +93,90 @@ KRB5CCNAME="$KRB5CCNAME" mount.cifs //se4.domain.tld/partage /mnt/docs/ \
 # TODO
 
 * Reprendre de zéro le script de logon.
+* Questions : 
 
+- sur le se4, la partage netlogon-linux (monter en phase d'initialisation en lecture seule pour synchroniser le skel du se4 en local 
+sur les clients linux) pourra-t-il fonctionner avec kerberos, sachant qu'aucun compte utilisateur AD ne s'est encore loggué sur le client en phase 
+d'initialisation ? Autrement dit, ne faut-il pas utiliser ntlmv2 pour faire ce montage (uniquement) et donc rajouter :
+```sh
+raw NTLMv2 auth yes 
+```
+... au partage [netlogon-linux] du se4 afin de pouvoir faire le montage de netlogon-linux avec sec=ntlmv2 ?
 
+- où faire la synchronisation du skel distant sur le client linux ? Sur se3, c'est au tout début de l'intégration que cela se faisait et 
+l'intégration s'arrêtait si la syncro n'avait pas pu être faite.
 
+* Sinon, si l'on reste sur la structure actuelle (synchronisation d'un skel distant en local), on pourrait repartir du script de logon actuel et 
+y apporter quelques modifications pour qu'il soit fonctionnel sur se4.
+
+- Ligne 23 : définir le chemin local /etc/se3 comme variable ansible :
+```sh
+REP_SE3_LOCAL = {{ role_dm_local_skel_path  }}
+```
+
+Ligne 1430 : utiliser des variables Ansible à la place de celles du paquet se3 :
+```sh
+SE3= {{ role_dm_ip }}
+BASE_DN= {{ role_dm_base_dn }}
+SERVEUR_NTP= {{ role_dm_ntp_server }}
+```
+
+- Ligne 1434 : définir la variable CHEMIN_PARTAGE_NETLOGON avec une variable ansible et en utilisant fqdn du se4 à la place de son IP
+```sh
+CHEMIN_PARTAGE_NETLOGON="//{{ role_dm_fqdn }}/$NOM_PARTAGE_NETLOGON"
+```
+- Ligne 1447 : supprimer l’option sec=ntlmv2 de la variable OPTIONS_MOUNT_CIFS_BASE car le montage d'un partage Samba sur se4 devra pouvoir 
+se faire en utilisant kerberos aussi.
+```sh
+OPTIONS_MOUNT_CIFS_BASE="nobrl,serverino,iocharset=utf8"
+```
+
+- Ligne 505 : rajouter l'option sec=ntlmv2 (ou sec=krb5 mais je ne pense pas que cela fonctionne ...) à la commande de montage de netlogon 
+en phase d'initialisation 
+```sh
+mount -t cifs "$CHEMIN_PARTAGE_NETLOGON" "$REP_NETLOGON" -o ro,guest,sec=ntlmv2,"$OPTIONS_MOUNT_CIFS_BASE"
+```
+
+- Ligne 602 et ailleurs ... : utilisation de la commande ldapsearch pour récupérer les groupes et utilisateurs de l'AD du se4. 
+Y a-t-il un moyen plus simple en AD ?
+Sinon, cette commande nécessite l'installation du paquet ldap-utils sur le client linux -> à rajouter dans une task du role dm ?
+
+- Ligne 556 : réécrire la fonction monter_partage_cifs() avec kerberos :
+```sh
+local KRB5CCNAME
+
+# On cherche d'abord les credentials de l'utilisateur
+KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN")
+if [ "$KRB5CCNAME"='' ]
+then
+	# au moment de l'execution de ces lignes de code, pam_krb5.so n'a pas fini de mettre en cache les credentials kerberos ...
+	# mais ces derniers sont temporaiment dispo en root au format krb5cc_pam_****
+	KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_pam_*' -user root)
+
+	if [ "$KRB5CCNAME"='' ]
+	then
+		# Impossible récupérer les credentials kerberos de l'utilisateur:
+			afficher_fenetre_erreur "Problème" \
+            "Erreur lors de l'appel de la fonction \"monter_partage\"." \
+            "Impossible de monter le partage \"$partage\"."
+		return 4
+	fi
+
+	# On met temporairement l'utilisateur propriétaire du fichier pam
+	chown "$LOGIN:" "$KRB5CCNAME"
+
+	timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+		-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
+
+	# On remet root propriétaire
+	chown "root:root" "$KRB5CCNAME"	
+else
+	timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+		-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
+fi
+```
+
+- Ligne 1005 et 1006: faire le montage avec la nouvelle fonction kerberos  
+monter_partage_cifs "$partage" "$point_de_montage" # port=139 faut-il rajouter cette option sur se4 ?
+
+- Supprimer tout ce qui concerne les credentials du paquet libpam-script à savoir la ligne 1458, ligne 1653 à 1685 et ligne 1753 à 1765
