@@ -95,7 +95,7 @@ KRB5CCNAME="$KRB5CCNAME" mount.cifs //se4.domain.tld/partage /mnt/docs/ \
 * Reprendre de zéro le script de logon.
 * Questions : 
 
-- sur le se4, la partage netlogon-linux (monter en phase d'initialisation en lecture seule pour synchroniser le skel du se4 en local 
+sur le se4, la partage netlogon-linux (monter en phase d'initialisation en lecture seule pour synchroniser le skel du se4 en local 
 sur les clients linux) pourra-t-il fonctionner avec kerberos, sachant qu'aucun compte utilisateur AD ne s'est encore loggué sur le client en phase 
 d'initialisation ? Autrement dit, ne faut-il pas utiliser ntlmv2 pour faire ce montage (uniquement) et donc rajouter :
 ```sh
@@ -103,13 +103,18 @@ raw NTLMv2 auth yes
 ```
 ... au partage [netlogon-linux] du se4 afin de pouvoir faire le montage de netlogon-linux avec sec=ntlmv2 ?
 
-- où faire la synchronisation du skel distant sur le client linux ? Sur se3, c'est au tout début de l'intégration que cela se faisait et 
-l'intégration s'arrêtait si la syncro n'avait pas pu être faite.
+Où faire la synchronisation du skel distant sur le client linux ? Sur se3, c'est au tout début de l'intégration que cela se faisait et 
+l'intégration s'arrêtait si la synchro n'avait pas pu être faite.
 
 * Sinon, si l'on reste sur la structure actuelle (synchronisation d'un skel distant en local), on pourrait repartir du script de logon actuel et 
 y apporter quelques modifications pour qu'il soit fonctionnel sur se4.
 
-- Ligne 23 : définir le chemin local /etc/se3 comme variable ansible :
+Supprimer les lignes 32 à 60 et ne garder que la commande suivante (car le script de logon ne peut s'éxécuter qu'en local) :
+```sh
+exec 1> "$REP_LOG_LOCAL/1.initialisation.log" 2>&1 
+```
+
+Ligne 23 : définir le chemin local /etc/se3 comme variable ansible :
 ```sh
 REP_SE3_LOCAL = {{ role_dm_local_skel_path  }}
 ```
@@ -121,27 +126,27 @@ BASE_DN= {{ role_dm_base_dn }}
 SERVEUR_NTP= {{ role_dm_ntp_server }}
 ```
 
-- Ligne 1434 : définir la variable CHEMIN_PARTAGE_NETLOGON avec une variable ansible et en utilisant fqdn du se4 à la place de son IP
+Ligne 1434 : définir la variable CHEMIN_PARTAGE_NETLOGON avec une variable ansible et en utilisant fqdn du se4 à la place de son IP
 ```sh
 CHEMIN_PARTAGE_NETLOGON="//{{ role_dm_fqdn }}/$NOM_PARTAGE_NETLOGON"
 ```
-- Ligne 1447 : supprimer l’option sec=ntlmv2 de la variable OPTIONS_MOUNT_CIFS_BASE car le montage d'un partage Samba sur se4 devra pouvoir 
+Ligne 1447 : supprimer l’option sec=ntlmv2 de la variable OPTIONS_MOUNT_CIFS_BASE car le montage d'un partage Samba sur se4 devra pouvoir 
 se faire en utilisant kerberos aussi.
 ```sh
 OPTIONS_MOUNT_CIFS_BASE="nobrl,serverino,iocharset=utf8"
 ```
 
-- Ligne 505 : rajouter l'option sec=ntlmv2 (ou sec=krb5 mais je ne pense pas que cela fonctionne ...) à la commande de montage de netlogon 
+Ligne 505 : rajouter l'option sec=ntlmv2 (ou sec=krb5 mais je ne pense pas que cela fonctionnera ...) à la commande de montage de netlogon 
 en phase d'initialisation 
 ```sh
 mount -t cifs "$CHEMIN_PARTAGE_NETLOGON" "$REP_NETLOGON" -o ro,guest,sec=ntlmv2,"$OPTIONS_MOUNT_CIFS_BASE"
 ```
 
-- Ligne 602 et ailleurs ... : utilisation de la commande ldapsearch pour récupérer les groupes et utilisateurs de l'AD du se4. 
+Ligne 602 et ailleurs ... : utilisation de la commande ldapsearch pour récupérer les groupes et utilisateurs de l'AD du se4. 
 Y a-t-il un moyen plus simple en AD ?
 Sinon, cette commande nécessite l'installation du paquet ldap-utils sur le client linux -> à rajouter dans une task du role dm ?
 
-- Ligne 556 : réécrire la fonction monter_partage_cifs() avec kerberos :
+Ligne 556 : réécrire la fonction monter_partage_cifs() avec kerberos :
 ```sh
 local KRB5CCNAME
 
@@ -176,7 +181,7 @@ else
 fi
 ```
 
-- Ligne 1005 et 1006: faire le montage avec la nouvelle fonction kerberos  
+Ligne 1005 et 1006: faire le montage avec la nouvelle fonction kerberos  
 monter_partage_cifs "$partage" "$point_de_montage" # port=139 faut-il rajouter cette option sur se4 ?
 
-- Supprimer tout ce qui concerne les credentials du paquet libpam-script à savoir la ligne 1458, ligne 1653 à 1685 et ligne 1753 à 1765
+Supprimer tout ce qui concerne les credentials du paquet libpam-script à savoir la ligne 1458, ligne 1653 à 1685 et ligne 1753 à 1765
