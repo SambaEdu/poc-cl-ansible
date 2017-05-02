@@ -1,0 +1,19 @@
+---
+# An array of strings to define the name of Samba shares
+role_pammount_share:
+  - user: toto
+    group: domusers
+    path: netlogon
+    mountpoint: netlogon
+    
+  - user: toto
+    group: domusers
+    path: myhome
+    mountpoint: myhome
+
+role_pammount_fqdn: '{{ settings.samba.fqdn }}'
+
+# Distributions tested and supported by this role.
+role_pammount_supported_distributions:
+  - 'xenial'
+  - 'stretch'

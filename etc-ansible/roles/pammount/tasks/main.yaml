@@ -1,0 +1,20 @@
+---
+- name: check if the distribution is supported
+  assert:
+    that: ansible_distribution_release in role_pammount_supported_distributions
+    msg: For this role, the distribution must be in {{ role_pammount_supported_distributions }}
+
+- name: ensure automount installation
+  apt:
+    name: libpam-mount
+    state: present
+    install_recommends: no
+
+- name: write pam_mount config file /etc/security/pam_mount.conf.xml
+  template:
+    src: pam_mount.conf.xml.j2
+    dest: /etc/security/pam_mount.conf.xml
+    owner: root
+    group: root
+    mode: '0644'
+
