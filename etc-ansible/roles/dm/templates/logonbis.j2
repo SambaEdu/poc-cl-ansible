@@ -28,31 +28,7 @@ REP_LOG_LOCAL="$REP_SE3_LOCAL/log"
 case "$PHASE" in
 
     "initialisation")
-    
-        # On cherche d'abord à récupérer le nom absolu du script exécuté.
-        if echo "$0" | grep -q '^/'; then
-            # L'appel du script s'est fait via son nom absolu.
-            nom_absolu_script="$0"
-        else
-            rep=$(dirname "$0")
-            nom=$(basename "$0")
-            nom_absolu_script=$(cd "$rep"; pwd)"/$nom"
-        fi
-
-        # Ici on fait appel à un grep classique car aucune fonction
-        # n'est encore définie à ce stade du script. Mais ce n'est
-        # pas très grave car le motif ici est une chaîne de caractères
-        # sans surprise.
-        if echo "$nom_absolu_script" | grep -q -- "^$REP_SE3_LOCAL"; then
-            # Le script exécuté se trouve dans le répertoire local.
-            exec 1> "$REP_LOG_LOCAL/1.initialisation.log" 2>&1
-        else
-            # Sinon, c'est la version distante qui est exécutée
-            # et il vaut mieux rediriger la sortie dans un autre
-            # fichier, sans quoi le script distant va réécrire
-            # par dessus le log du script local.
-            exec 1> "$REP_LOG_LOCAL/1.initialisation_distant.log" 2>&1
-        fi
+        exec 1> "$REP_LOG_LOCAL/1.initialisation.log" 2>&1
         ;;
 
     "ouverture")
