@@ -1,0 +1,37 @@
+---
+# Synchronize se4 skel to local client
+# - name: create local skel directory
+#  shell: rm -Rf '{{ role_skel_client }}' && mkdir '{{ role_skel_client }}' && chown root:root '{{ role_skel_client }}' && chmod -R 700 '{{ role_skel_client }}'
+- name: delete local skel directory
+  file:
+    path: '{{ role_skel_client }}/'
+    state: absent
+
+- name: create local skel directory
+  file:
+    path: '{{ role_skel_client }}'
+    state: directory
+
+- name: copy bin repository on local client
+  copy:
+    src: '{{ role_skel_se4 }}/bin'
+    dest: '{{ role_skel_client }}'
+    follow: no
+    force: yes
+
+- name: copy se4 skel on local client
+  copy:
+    src: '{{ role_skel_se4 }}/distribs/{{ ansible_distribution_release }}/skel'
+    dest: '{{ role_skel_client }}'
+    follow: no
+    force: yes
+
+- name: put permissions on local skel
+#  shell: chown root:root '{{ role_skel_client }}' && chmod -R 700 '{{ role_skel_client }}'
+  file:
+    path: '{{ role_skel_client }}'
+    owner: root
+    group: root
+    mode: 0700
+    state: directory
+    recurse: yes
