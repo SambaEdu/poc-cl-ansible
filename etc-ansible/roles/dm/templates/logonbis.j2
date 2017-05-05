@@ -529,7 +529,50 @@ function monter_partage_cifs ()
         # on les ajoute à la liste.
         options="$3,$options"
     fi
-    timeout "--signal=SIGTERM" 10s mount -t cifs "$1" "$2" -o "$options"
+    #timeout "--signal=SIGTERM" 10s mount -t cifs "$1" "$2" -o "$options"
+	local KRB5CCNAME
+	# On cherche d'abord les credentials de l'utilisateur
+	KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN")
+	if [ "$KRB5CCNAME"='' ]		# Aucun ticket kerberos utilisateur trouvé : on cherche un ticket kerberos "temporaire"
+	then
+		# au moment de l'execution de ces lignes de code, pam_krb5.so n'a pas fini de mettre en cache les credentials kerberos ...
+		# mais ces derniers sont temporaiment dispo en root au format krb5cc_pam_****
+		KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_pam_*' -user root)
+
+		if [ "$KRB5CCNAME"='' ]
+		then
+			# Impossible récupérer les credentials kerberos de l'utilisateur:
+			afficher_fenetre_erreur "Problème" \
+            "Erreur lors de l'appel de la fonction \"monter_partage\"." \
+            "Impossible de récupérer le ticket kerberos de l'utilisateur" \
+            "Impossible de monter le partage \"$partage\"."
+			return 4
+		fi
+
+		# On met temporairement l'utilisateur propriétaire du fichier pam
+		chown "$LOGIN:" "$KRB5CCNAME"
+
+		timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+			-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
+
+		# On remet root propriétaire
+		chown "root:root" "$KRB5CCNAME"	
+	else
+		# On vérifie qu'il n'y a qu'un seul ticket kerberos pour l'utilisateur loggué
+		NB_TICKETS=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN" | wc -l)
+		if [ "$NB_TICKETS"="1" ]		
+		then 
+			timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+				-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
+		else
+			# Impossible récupérer les credentials kerberos de l'utilisateur:
+			afficher_fenetre_erreur "Problème" \
+            "Erreur lors de l'appel de la fonction \"monter_partage\"." \
+            "Le nombre de tickets kerberos utilisateur est > 1" \
+            "Impossible de monter le partage \"$partage\"."
+			return 4	
+		fi
+	fi
 }
 
 
@@ -979,7 +1022,8 @@ function monter_partage ()
     # serveur, n'est pas nécessaire mais on la met quand même histoire 
     # d'enfoncer le clou encore un peu.
     monter_partage_cifs "$partage" "$point_de_montage" \
-        "credentials=$CREDENTIALS,uid=$LOGIN,gid=lcs-users,port=139,netbiosname=$NOM_HOTE"
+        #"credentials=$CREDENTIALS,uid=$LOGIN,gid=lcs-users,port=139,netbiosname=$NOM_HOTE"
+        port=139  # Faut-il garder ce port sous se4 et avec kerberos?
     if [ "$?" != "0" ]; then
         # Ici, il y a un problème réseau.
         afficher_fenetre_erreur "Problème" \
