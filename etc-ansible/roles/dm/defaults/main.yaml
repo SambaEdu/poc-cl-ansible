@@ -7,7 +7,6 @@ role_dm_samba_domain: '{{ ansible_domain }}'
 role_dm_logon_skel: '{{ settings.clientslinux.skel }}'
 role_dm_logon_ip: '{{ settings.samba.ip }}'
 role_dm_logon_base_dn: '{{ settings.samba.dn }}'
-role_dm_logon_fqdn: samba.{{ ansible_domain }}
 
 # Distributions tested and supported by this role.
 role_dm_supported_distributions:

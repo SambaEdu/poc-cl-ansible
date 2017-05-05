@@ -1407,7 +1407,7 @@ SE3="{{ role_dm_logon_ip }}"
 BASE_DN="{{ role_dm_logon_base_dn }}"
 # SERVEUR_NTP="__SERVEUR_NTP__"
 NOM_PARTAGE_NETLOGON="netlogon-linux"
-CHEMIN_PARTAGE_NETLOGON="//{{ role_dm_logon_fqdn }}/$NOM_PARTAGE_NETLOGON"
+CHEMIN_PARTAGE_NETLOGON="//{{ role_dm_samba_fqdn }}/$NOM_PARTAGE_NETLOGON"
 
 # Variables liées à l'hôte.
 NOM_HOTE=$(hostname)
