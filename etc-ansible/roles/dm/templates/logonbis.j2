@@ -20,7 +20,7 @@
 # de stdout et de stderr.
 PHASE="$1" 
 
-REP_SE3_LOCAL="/etc/se3"
+REP_SE3_LOCAL="{{ role_dm_logon_skel }}"
 REP_LOG_LOCAL="$REP_SE3_LOCAL/log"
 
 # En fonction de l'argument PHASE, on redirige différemment
@@ -1403,11 +1403,11 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 #############################################
 
 # Variables liées au Se3.
-SE3="__SE3__"
-BASE_DN="__BASE_DN__"
-SERVEUR_NTP="__SERVEUR_NTP__"
+SE3="{{ role_dm_logon_ip }}"
+BASE_DN="{{ role_dm_logon_base_dn }}"
+# SERVEUR_NTP="__SERVEUR_NTP__"
 NOM_PARTAGE_NETLOGON="netlogon-linux"
-CHEMIN_PARTAGE_NETLOGON="//$SE3/$NOM_PARTAGE_NETLOGON"
+CHEMIN_PARTAGE_NETLOGON="//{{ role_dm_logon_fqdn }}/$NOM_PARTAGE_NETLOGON"
 
 # Variables liées à l'hôte.
 NOM_HOTE=$(hostname)

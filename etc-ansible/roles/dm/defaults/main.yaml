@@ -3,6 +3,12 @@
 role_dm_samba_fqdn: samba.{{ ansible_domain }}
 role_dm_samba_domain: '{{ ansible_domain }}'
 
+# Variable for logon script
+role_dm_logon_skel: '/etc/se4'
+role_dm_logon_ip: ''
+role_dm_logon_base_dn: ''
+role_dm_logon_fqdn: samba.{{ ansible_domain }}
+
 # Distributions tested and supported by this role.
 role_dm_supported_distributions:
   - 'xenial'
