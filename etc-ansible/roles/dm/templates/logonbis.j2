@@ -505,7 +505,20 @@ function monter_netlogon ()
     fi
 }
 
-
+# Cette fonction compte le nombre de tickets kerberos présent dans /tmp
+# En principe, un seul tiket kerberos doit être présent : celui de l'utilisateur qui se loggue
+function nombre_ticket_kerberos ()
+{
+	local nb_ticket_kerberos_user
+    local nb_ticket_kerberos_root
+    local nb_ticket_kerberos 
+    
+    nb_ticket_kerberos_user=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN" | wc -l)
+    nb_ticket_kerberos_root=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_pam*' -user root | wc -l)
+    nb_ticket_kerberos =$(($nb_ticket_kerberos_user + $nb_ticket_kerberos_root))
+    
+    return "$nb_ticket_kerberos"
+}
 
 # Cette fonction tente de monter un partage CIFS (comme par exemple
 # le partage « Classes » du Se3). Le premier paramètre est le chemin
@@ -1023,7 +1036,7 @@ function monter_partage ()
     # d'enfoncer le clou encore un peu.
     monter_partage_cifs "$partage" "$point_de_montage" \
         #"credentials=$CREDENTIALS,uid=$LOGIN,gid=lcs-users,port=139,netbiosname=$NOM_HOTE"
-        port=139  # Faut-il garder ce port sous se4 et avec kerberos?
+        # port=139  # Faut-il garder ce port sous se4 et avec kerberos?
     if [ "$?" != "0" ]; then
         # Ici, il y a un problème réseau.
         afficher_fenetre_erreur "Problème" \
@@ -1475,7 +1488,7 @@ REP_SKEL_LOCAL="$REP_SE3_LOCAL/skel"
 REP_UNEFOIS_LOCAL="$REP_SE3_LOCAL/unefois"
 LOGON_SCRIPT_LOCAL="$REP_BIN_LOCAL/logon"
 VERSION_SKEL_LOCAL="$REP_SKEL_LOCAL/.VERSION"
-CREDENTIALS="$REP_TMP_LOCAL/credentials_$LOGNAME"
+#CREDENTIALS="$REP_TMP_LOCAL/credentials_$LOGNAME"
 REP_MONTAGE="/mnt"
 
 # Noms de fichiers ou de répertoires du Se3 accessibles par le client 
@@ -1580,6 +1593,7 @@ function initialisation ()
     # connecté et le nettoyage est alors incomplet.
     sleep 1
     
+    rm -rf --one-file-system '/tmp/krb5cc_*'	# On supprime d'éventuels tickets kerberos d'anciens utilisateurs loggués
     nettoyer_rep_montage
     nettoyer_rep_home
     
@@ -1669,41 +1683,6 @@ function initialisation ()
         afficher "Suppression du répertoire .dbus/ dans le profil local."
         rm -fr --one-file-system "$REP_SKEL_LOCAL/.dbus"
     fi
-
-    #######################################################################################
-    # Compatibilité du paquet >= 1.1.8.2 avec des clients linux intégrés antérieurement 
-    # avec le paquet clients linux <= 1.1.8.1 
-    # On réécrit completement le nouveau fichier pam_script_auth à chaque initialisation
-    #######################################################################################
-
-echo '#! /bin/bash
-
-function est_utilisateur_local ()
-{
-    if grep -q "^$1:" "/etc/passwd"; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-if est_utilisateur_local "$PAM_USER"; then
-    # On ne fait rien.
-    exit 0
-fi
-
-# Sinon, on écrit les identifiants.
-
-echo "username=$PAM_USER
-password=$PAM_AUTHTOK" > "/etc/se3/tmp/credentials_$PAM_USER"
-
-chown root:root "/etc/se3/tmp/credentials_$PAM_USER"
-chmod 700 "/etc/se3/tmp/credentials_$PAM_USER"
-
-exit 0' > "/usr/share/libpam-script/pam_script_auth"
-
-    ######################################################################
-
     
     initialisation_perso 1> "$REP_LOG_LOCAL/1.initialisation_perso.log" 2>&1
     
@@ -1758,10 +1737,11 @@ function ouverture ()
     sleep 1
 
     # Maintenant, il faut procéder aux montages des partages CIFS.
-    # Pour commencer, il faut attendre la création du fichier CREDENTIALS.
+    # Pour commencer, il faut attendre la création du ticket de CREDENTIALS de kerberos.
     local c
     c="1"
-    while ! test -r "$CREDENTIALS" && [ "$c" -le 4 ]; do
+    
+    while [ nombre_ticket_kerberos != '1' ] && [ "$c" -le 4 ]; do
         # Tant que le fichier n'est pas accessible en lecture, on attend un peu.
         sleep 0.5
         c=$((c+1)) # pour éviter une boucle infinie, après 4 tentatives, on sort de la boucle.
