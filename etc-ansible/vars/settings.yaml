@@ -13,4 +13,9 @@ samba:
     login: 'Administrator'
     pwd: 'Administrator@123'
   fqdn: 'samba.athome.priv'
-
+  ip: '192.168.0.20'
+  dn: 'ou=lyc-demo,ou=ac-demo,ou=education,o=gouv,c=fr'
+  netlogonlinux: '/home/netlogon/clients-linux'
+  
+clientslinux:
+  skel: '/etc/se4'

@@ -1,6 +1,6 @@
 ---
 # Local client repository to copy se4 skel
-role_skel_client: '/etc/se4'
+role_skel_client: '{{ settings.clientslinux.skel }}'
 
 # Path of skel on se4
-role_skel_se4: '/home/netlogon/clients-linux'
+role_skel_se4: '{{ settings.samba.netlogonlinux }}'
