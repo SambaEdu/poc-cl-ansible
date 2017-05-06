@@ -22,7 +22,7 @@
 - name: copy logon script
   template:
     src: logon.j2
-    dest: {{ role_logon_local_se4_directory }}/logon
+    dest: {{ role_logon_local_se4_directory }}/bin/logon
     owner: root
     group: root
     mode: '0700'
