@@ -591,7 +591,7 @@ function monter_partage_cifs ()
 		KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_pam_*' -user root)
 		# On met temporairement l'utilisateur propriétaire du fichier pam afin que la commande mount.cifs puisse monter le partage
 		chown "$LOGIN:" "$KRB5CCNAME"
-		timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+		KRB5CCNAME="$KRB5CCNAME" timeout "--signal=SIGTERM" 10s mount.cifs "$1" "$2" \
 {% endraw %}
 			-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
 {% raw %}
@@ -599,7 +599,7 @@ function monter_partage_cifs ()
 		# On remet root propriétaire afin que pam_krb5.so puisse finaliser l'enregistrement du ticket
 		chown "root:root" "$KRB5CCNAME"	
 	else
-		timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+		KRB5CCNAME="$KRB5CCNAME" timeout "--signal=SIGTERM" 10s mount.cifs "$1" "$2" \
 {% endraw %}
 			-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
 {% raw %}
