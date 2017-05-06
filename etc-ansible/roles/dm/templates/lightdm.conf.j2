@@ -4,7 +4,9 @@
     greeter-show-manual-login = true
     greeter-hide-users        = true
     allow-guest               = false
-    greeter-setup-script      = /usr/local/sbin/logon init
-    session-setup-script      = /usr/local/sbin/logon logon
-    session-cleanup-script    = /usr/local/sbin/logon logoff
-
+#    greeter-setup-script      = /etc/se4/logon initialisation
+#    session-setup-script      = /etc/se4/logon ouverture
+#    session-cleanup-script    = /etc/se4/logon fermeture
+    greeter-setup-script      = /usr/local/sbin/logon initialisation
+    session-setup-script      = /usr/local/sbin/logon ouverture
+    session-cleanup-script    = /usr/local/sbin/lobon fermeture

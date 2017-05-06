@@ -2,6 +2,12 @@
 # Synchronize se4 skel to local client
 # - name: create local skel directory
 #  shell: rm -Rf '{{ role_skel_client }}' && mkdir '{{ role_skel_client }}' && chown root:root '{{ role_skel_client }}' && chmod -R 700 '{{ role_skel_client }}'
+
+- name: umount tmp directory
+  mount:
+    path: '{{ role_skel_client }}/tmp'
+    state: unmounted
+
 - name: delete local skel directory
   file:
     path: '{{ role_skel_client }}/'
@@ -10,6 +16,21 @@
 - name: create local skel directory
   file:
     path: '{{ role_skel_client }}'
+    state: directory
+
+- name: create log repository
+  file:
+    path: '{{ role_skel_client }}/log'
+    state: directory
+
+- name: create tmp repository
+  file:
+    path: '{{ role_skel_client }}/tmp'
+    state: directory
+
+- name: create unefois repository
+  file:
+    path: '{{ role_skel_client }}/unefois'
     state: directory
 
 - name: copy bin repository on local client
@@ -35,3 +56,21 @@
     mode: 0700
     state: directory
     recurse: yes
+
+- name: umount netlogon directory
+  mount:
+    path: '/mnt/netlogon'
+    state: unmounted
+
+- name: create netlogon repository
+  file:
+    path: '/mnt/netlogon'
+    state: directory
+
+- name: put permissions on netlogon repository
+  file:
+    path: '/mnt/netlogon'
+    owner: root
+    group: root
+    mode: 0700
+

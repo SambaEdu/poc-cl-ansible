@@ -6,8 +6,16 @@
 
 - name: copy logon script 
   template:
-    src: logon.sh.j2
-    dest: /usr/local/sbin/logon.sh
+    src: logonbis.j2
+    dest: /usr/local/sbin/logon
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: copy logon script
+  template:
+    src: logonbis.j2
+    dest: /etc/se4/logon
     owner: root
     group: root
     mode: '0755'

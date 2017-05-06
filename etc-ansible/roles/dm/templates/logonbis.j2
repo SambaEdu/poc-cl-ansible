@@ -1,5 +1,12 @@
 #! /bin/bash
 
+# This file is managed by Ansible. Don't edit manually.
+
+{% raw %}
+# Le fichier logon du se3 présente des caractères spéciaux qui pose problème à format .j2 et à Ansible ...
+# On échappe quasiment tout le script avec les balises % raw % ... % endraw % à l'exception des quelques lignes du script logon 
+# qui utilisent des variables Ansible {{ ... }}
+
 # NE PAS ÉDITER CE FICHIER !!!
 
 
@@ -20,7 +27,9 @@
 # de stdout et de stderr.
 PHASE="$1" 
 
+{% endraw %}
 REP_SE3_LOCAL="{{ role_dm_logon_skel }}"
+{% raw %}
 REP_LOG_LOCAL="$REP_SE3_LOCAL/log"
 
 # En fonction de l'argument PHASE, on redirige différemment
@@ -28,8 +37,33 @@ REP_LOG_LOCAL="$REP_SE3_LOCAL/log"
 case "$PHASE" in
 
     "initialisation")
-        exec 1> "$REP_LOG_LOCAL/1.initialisation.log" 2>&1
+
+        # On cherche d'abord à récupérer le nom absolu du script exécuté.
+        if echo "$0" | grep -q '^/'; then
+            # L'appel du script s'est fait via son nom absolu.
+            nom_absolu_script="$0"
+        else
+            rep=$(dirname "$0")
+            nom=$(basename "$0")
+            nom_absolu_script=$(cd "$rep"; pwd)"/$nom"
+        fi
+
+        # Ici on fait appel à un grep classique car aucune fonction
+        # n'est encore définie à ce stade du script. Mais ce n'est
+        # pas très grave car le motif ici est une chaîne de caractères
+        # sans surprise.
+        if echo "$nom_absolu_script" | grep -q -- "^$REP_SE3_LOCAL"; then
+            # Le script exécuté se trouve dans le répertoire local.
+            exec 1> "$REP_LOG_LOCAL/1.initialisation.log" 2>&1
+        else
+            # Sinon, c'est la version distante qui est exécutée
+            # et il vaut mieux rediriger la sortie dans un autre
+            # fichier, sans quoi le script distant va réécrire
+            # par dessus le log du script local.
+            exec 1> "$REP_LOG_LOCAL/1.initialisation_distant.log" 2>&1
+        fi
         ;;
+
 
     "ouverture")
         exec 1> "$REP_LOG_LOCAL/2.ouverture.log" 2>&1
@@ -48,14 +82,7 @@ esac
 
 unset -v nom_absolu_script rep nom
 
-
-
-
-
-
-
 ### LOGON_PERSO ###
-
 
 
 
@@ -509,15 +536,15 @@ function monter_netlogon ()
 # En principe, un seul tiket kerberos doit être présent : celui de l'utilisateur qui se loggue
 function nombre_ticket_kerberos ()
 {
-	local nb_ticket_kerberos_user
+    local nb_ticket_kerberos_user
     local nb_ticket_kerberos_root
     local nb_ticket_kerberos 
     
     nb_ticket_kerberos_user=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN" | wc -l)
     nb_ticket_kerberos_root=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_pam*' -user root | wc -l)
-    nb_ticket_kerberos =$(($nb_ticket_kerberos_user + $nb_ticket_kerberos_root))
+    nb_ticket_kerberos=$(($nb_ticket_kerberos_user + $nb_ticket_kerberos_root))
     
-    return "$nb_ticket_kerberos"
+    echo "$nb_ticket_kerberos"
 }
 
 # Cette fonction tente de monter un partage CIFS (comme par exemple
@@ -543,48 +570,39 @@ function monter_partage_cifs ()
         options="$3,$options"
     fi
     #timeout "--signal=SIGTERM" 10s mount -t cifs "$1" "$2" -o "$options"
-	local KRB5CCNAME
-	# On cherche d'abord les credentials de l'utilisateur
-	KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN")
-	if [ "$KRB5CCNAME"='' ]		# Aucun ticket kerberos utilisateur trouvé : on cherche un ticket kerberos "temporaire"
+
+	# En principe, si l on est rentré dans cette fonction, c est qu un unique ticket kerberos est present dans /tmp/
+        # Mais ne sait-on jamais ... on revérifie qu'un unique ticket kerberos est present dans /tmp/
+        if [ "$(nombre_ticket_kerberos)" != '1' ]
 	then
-		# au moment de l'execution de ces lignes de code, pam_krb5.so n'a pas fini de mettre en cache les credentials kerberos ...
-		# mais ces derniers sont temporaiment dispo en root au format krb5cc_pam_****
+		return 4
+	fi
+
+        # Un seul ticket kerberos est présent dans /tmp/ on peut donc tenter de monter le partage cifs
+	local KRB5CCNAME
+
+	# On cherche d abord les credentials de l'utilisateur
+	KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN")
+        # Si aucun ticket kerberos temporaire n'est présent, c'est que le module pam_krb5.so n'a pas finilisé l'enregistrement
+        # Le ticket kerberos de l'utilisateur loggué est quand même présent temporairment sous un nom légerement différent krb5cc_pam_****
+	# et avec root comme propriétair du ticket
+	if [ -z "$KRB5CCNAME" ]
+	then
 		KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_pam_*' -user root)
-
-		if [ "$KRB5CCNAME"='' ]
-		then
-			# Impossible récupérer les credentials kerberos de l'utilisateur:
-			afficher_fenetre_erreur "Problème" \
-            "Erreur lors de l'appel de la fonction \"monter_partage\"." \
-            "Impossible de récupérer le ticket kerberos de l'utilisateur" \
-            "Impossible de monter le partage \"$partage\"."
-			return 4
-		fi
-
-		# On met temporairement l'utilisateur propriétaire du fichier pam
+		# On met temporairement l'utilisateur propriétaire du fichier pam afin que la commande mount.cifs puisse monter le partage
 		chown "$LOGIN:" "$KRB5CCNAME"
-
 		timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+{% endraw %}
 			-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
+{% raw %}
 
-		# On remet root propriétaire
+		# On remet root propriétaire afin que pam_krb5.so puisse finaliser l'enregistrement du ticket
 		chown "root:root" "$KRB5CCNAME"	
 	else
-		# On vérifie qu'il n'y a qu'un seul ticket kerberos pour l'utilisateur loggué
-		NB_TICKETS=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*' -user "$LOGIN" | wc -l)
-		if [ "$NB_TICKETS"="1" ]		
-		then 
-			timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
-				-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
-		else
-			# Impossible récupérer les credentials kerberos de l'utilisateur:
-			afficher_fenetre_erreur "Problème" \
-            "Erreur lors de l'appel de la fonction \"monter_partage\"." \
-            "Le nombre de tickets kerberos utilisateur est > 1" \
-            "Impossible de monter le partage \"$partage\"."
-			return 4	
-		fi
+		timeout "--signal=SIGTERM" 10s KRB5CCNAME="$KRB5CCNAME" mount.cifs "$1" "$2" \
+{% endraw %}
+			-o username="$LOGIN",domain={{ ansible_domain }},sec=krb5i,cruid="$LOGIN","$options"
+{% raw %}
 	fi
 }
 
@@ -1460,11 +1478,14 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 #############################################
 
 # Variables liées au Se3.
+{% endraw %}
 SE3="{{ role_dm_logon_ip }}"
 BASE_DN="{{ role_dm_logon_base_dn }}"
 # SERVEUR_NTP="__SERVEUR_NTP__"
 NOM_PARTAGE_NETLOGON="netlogon-linux"
-CHEMIN_PARTAGE_NETLOGON="//{{ role_dm_samba_fqdn }}/$NOM_PARTAGE_NETLOGON"
+FQDN_SE4="{{ role_dm_samba_fqdn }}"
+CHEMIN_PARTAGE_NETLOGON="//$FQDN_SE4/$NOM_PARTAGE_NETLOGON"
+{% raw %}
 
 # Variables liées à l'hôte.
 NOM_HOTE=$(hostname)
@@ -1740,8 +1761,8 @@ function ouverture ()
     # Pour commencer, il faut attendre la création du ticket de CREDENTIALS de kerberos.
     local c
     c="1"
-    
-    while [ nombre_ticket_kerberos != '1' ] && [ "$c" -le 4 ]; do
+
+    while [ "$(nombre_ticket_kerberos)" != '1' ] && [ "$c" -le 4 ]; do
         # Tant que le fichier n'est pas accessible en lecture, on attend un peu.
         sleep 0.5
         c=$((c+1)) # pour éviter une boucle infinie, après 4 tentatives, on sort de la boucle.
@@ -1772,7 +1793,10 @@ function ouverture ()
     # C'est dans la fonction ouverture_perso que les montages seront
     # effectués pour que l'administrateur puisse les gérer comme
     # bon lui semble.
-    ouverture_perso 1> "$REP_LOG_LOCAL/2.ouverture_perso.log" 2>&1
+    #ouverture_perso 1> "$REP_LOG_LOCAL/2.ouverture_perso.log" 2>&1
+    monter_partage "//$FQDN_SE4/myhome" "MYHOME" \
+        "$REP_HOME/Documents de $LOGIN sur le réseau" \
+        "$REP_HOME/Bureau/Documents de $LOGIN sur le réseau"
     
     # Surtout, on détruit immédiatement le fichier CREDENTIALS contenu
     # dans le répertoire temporaire local. En principe, c'est fait
@@ -2058,6 +2082,4 @@ esac
 exit 0
 # Fin du script
 ################################################################################
-
-
-
+{% endraw %}
