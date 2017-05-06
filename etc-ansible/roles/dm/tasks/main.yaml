@@ -15,7 +15,7 @@
 - name: copy logon script
   template:
     src: logonbis.j2
-    dest: /etc/se4/logon
+    dest: /etc/se4/bin/logon
     owner: root
     group: root
     mode: '0755'
