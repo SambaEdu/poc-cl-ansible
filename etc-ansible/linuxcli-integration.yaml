@@ -23,8 +23,10 @@
     - 'ntp'
     - 'krb5'
     - 'sambamember'
+#    - 'skel'
+#    - 'logon'
     - 'dm'
-    - 'pammount'
+#    - 'pammount'
     - { role: reboot, when: really_reboot  } # Must be the last role included.
 
 

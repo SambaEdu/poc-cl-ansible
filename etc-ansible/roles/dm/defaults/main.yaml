@@ -1,12 +1,6 @@
 ---
-# 
-role_dm_samba_fqdn: samba.{{ ansible_domain }}
-role_dm_samba_domain: '{{ ansible_domain }}'
-
-# Variable for logon script
-role_dm_logon_skel: '{{ settings.clientslinux.skel }}'
-role_dm_logon_ip: '{{ settings.samba.ip }}'
-role_dm_logon_base_dn: '{{ settings.samba.dn }}'
+# Local client directory in which will be synchronise se4 skel
+role_dm_local_se4_repository: '{{ settings.clientslinux.skel }}'
 
 # Distributions tested and supported by this role.
 role_dm_supported_distributions:

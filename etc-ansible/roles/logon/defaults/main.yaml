@@ -1,0 +1,8 @@
+---
+# le repertoire local des clients linux dans lequel le skel distant du se4 est synchronisé
+role_logon_local_se4_directory: '{{ settings.clientslinux.skel }}'
+
+role_logon_se4_ip: '{{ settings.samba.ip }}'
+role_logon_base_dn: '{{ settings.samba.dn }}'
+role_logon_se4_fqdn: '{{ settings.samba.fqdn }}'
+

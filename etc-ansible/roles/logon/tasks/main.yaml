@@ -1,0 +1,28 @@
+---
+- name: install rsync necessary on local client to synchronize local skel with se4 skel
+  apt:
+    name: rsync
+    state: present
+
+- name: install ldap-utils that contains ldapsearch commands used by logon script to search user's group in se4 ldap database
+  apt:
+    name: ldap-utils
+    state: present
+
+# A supprimer : cela évite de mettre à jour le script logon sur le se4 mais devra être supprimer une fois le paquet se4-clients-linux de dispo
+- name: copy logon script on local client => shoud be deleted "at the end" (simplify testing by avoiding local logon updates)
+  template:
+    src: logon.j2
+    dest: /usr/local/sbin/logon
+    owner: root
+    group: root
+    mode: '0700'
+# Fin de la partie à supprimer
+
+- name: copy logon script
+  template:
+    src: logon.j2
+    dest: {{ role_logon_local_se4_directory }}/logon
+    owner: root
+    group: root
+    mode: '0700'

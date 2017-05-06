@@ -12,5 +12,13 @@ role_sambamember_realm: '{{ settings.network.domain | upper }}'
 role_sambamember_join_account: '{{ settings.samba.admin.login }}'
 role_sambamember_join_password: '{{ settings.samba.admin.pwd }}'
 
-role_dm_samba_fqdn: '{{ settings.samba.fqdn }}'
-role_dm_samba_domain: '{{ settings.network.domain }}'
+role_dm_local_se4_repository: '{{ settings.clientslinux.skel }}'
+
+role_skel_client: '{{ settings.clientslinux.skel }}'
+role_skel_se4: '{{ settings.samba.netlogonlinux }}'
+
+
+role_logon_local_se4_directory: '{{ settings.clientslinux.skel }}'
+role_logon_se4_ip: '{{ settings.samba.ip }}'
+role_logon_base_dn: '{{ settings.samba.dn }}'
+role_logon_se4_fqdn: '{{ settings.samba.fqdn }}'

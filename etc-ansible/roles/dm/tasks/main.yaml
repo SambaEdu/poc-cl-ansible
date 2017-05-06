@@ -4,22 +4,6 @@
     that: ansible_distribution_release in role_dm_supported_distributions
     msg: For this role, the distribution must be in {{ role_dm_supported_distributions }}
 
-- name: copy logon script 
-  template:
-    src: logonbis.j2
-    dest: /usr/local/sbin/logon
-    owner: root
-    group: root
-    mode: '0755'
-
-- name: copy logon script
-  template:
-    src: logonbis.j2
-    dest: /etc/se4/bin/logon
-    owner: root
-    group: root
-    mode: '0755'
-
 - name: ensure installation of the display manager lightdm
   apt:
     name: lightdm

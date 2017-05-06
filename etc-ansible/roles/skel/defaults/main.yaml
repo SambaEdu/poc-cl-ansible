@@ -1,5 +1,5 @@
 ---
-# Local client repository to copy se4 skel
+# Local client repository to synchronize se4 skel
 role_skel_client: '{{ settings.clientslinux.skel }}'
 
 # Path of skel on se4

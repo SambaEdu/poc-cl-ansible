@@ -28,7 +28,7 @@
 PHASE="$1" 
 
 {% endraw %}
-REP_SE3_LOCAL="{{ role_dm_logon_skel }}"
+REP_SE3_LOCAL="{{ role_logon_local_se4_directory }}"
 {% raw %}
 REP_LOG_LOCAL="$REP_SE3_LOCAL/log"
 
@@ -1479,11 +1479,11 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Variables liées au Se3.
 {% endraw %}
-SE3="{{ role_dm_logon_ip }}"
-BASE_DN="{{ role_dm_logon_base_dn }}"
+SE3="{{ role_logon_se4_ip }}"
+BASE_DN="{{ role_logon_base_dn }}"
 # SERVEUR_NTP="__SERVEUR_NTP__"
 NOM_PARTAGE_NETLOGON="netlogon-linux"
-FQDN_SE4="{{ role_dm_samba_fqdn }}"
+FQDN_SE4="{{ role_logon_se4_fqdn }}"
 CHEMIN_PARTAGE_NETLOGON="//$FQDN_SE4/$NOM_PARTAGE_NETLOGON"
 {% raw %}
 
