@@ -1828,9 +1828,9 @@ function ouverture ()
     # effectués pour que l'administrateur puisse les gérer comme
     # bon lui semble.
     #ouverture_perso 1> "$REP_LOG_LOCAL/2.ouverture_perso.log" 2>&1
-    monter_partage "//$FQDN_SE4/myhome" "MYHOME" \
-        "$REP_HOME/Documents de $LOGIN sur le réseau" \
-        "$REP_HOME/Bureau/Documents de $LOGIN sur le réseau"
+    monter_partage "//$FQDN_SE4/homes" "HOMES" \
+        "$REP_HOME/Home de $LOGIN sur le réseau" \
+        "$REP_HOME/Bureau/Home de $LOGIN sur le réseau"
     
     # Surtout, on détruit immédiatement le fichier CREDENTIALS contenu
     # dans le répertoire temporaire local. En principe, c'est fait
