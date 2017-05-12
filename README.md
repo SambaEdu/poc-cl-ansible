@@ -109,7 +109,12 @@ Les points importants à retenir :
 
 Reste à faire:
 * La synchro du répertoire .mozilla pour que le groupe Profs concerve ces préférences.
+
+* Tester que le fichier de conf smb_CIFSFS.conf du se3 est encore valable sur se4 ? 
+(et mettre l'option raw NTLMv2 auth = yes uniquement sur le partage netlogon-linux ou utiliser sec=ntlmsspi ?) 
+
 * Réécrire les deux fonctions afficher_liste_groupes() et afficher_liste_parcs() du script de logon mais avec la commande ldbsearch
+
 * Point important pour le packaging : il faudra penser à "gérer" les balises d'échappement {{ raw }} ... {{ endraw }} du script de logon 
   (ou comprendre pourquoile format .j2 se plaint de certains caractères du script de logon.)
 
