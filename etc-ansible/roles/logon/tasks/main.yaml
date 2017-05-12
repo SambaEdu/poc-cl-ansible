@@ -4,9 +4,9 @@
     name: rsync
     state: present
 
-- name: install ldap-utils that contains ldapsearch commands used by logon script to search user's group in se4 ldap database
+- name: install ldb-tools that contains ldbsearch commands used by logon script to search user's group in se4 ldap database
   apt:
-    name: ldap-utils
+    name: ldb-tools
     state: present
 
 # A supprimer : cela évite de mettre à jour le script logon sur le se4 mais devra être supprimer une fois le paquet se4-clients-linux de dispo

@@ -572,8 +572,8 @@ function monter_partage_cifs ()
     #timeout "--signal=SIGTERM" 10s mount -t cifs "$1" "$2" -o "$options"
 
 	# En principe, si l on est rentré dans cette fonction, c est qu un unique ticket kerberos est present dans /tmp/
-        # Mais ne sait-on jamais ... on revérifie qu'un unique ticket kerberos est present dans /tmp/
-        if [ "$(nombre_ticket_kerberos)" != '1' ]
+    # Mais ne sait-on jamais ... on revérifie qu'un unique ticket kerberos est present dans /tmp/
+    if [ "$(nombre_ticket_kerberos)" != '1' ]
 	then
 		return 4
 	fi
@@ -649,7 +649,24 @@ function appartient_au_groupe ()
     local n
     # On cherche à afficher la liste des DN des entrées de l'OU Groups
     # qui possèdent un attribut memberUid égal à "$2".
-    n=$(timeout "--signal=SIGTERM" 4s ldapsearch -xLLL -h "$SE3" -b "cn=$1,ou=Groups,$BASE_DN" "(memberUid=$2)" "dn" | wc -l)
+    #n=$(timeout "--signal=SIGTERM" 4s ldapsearch -xLLL -h "$SE3" -b "cn=$1,ou=Groups,$BASE_DN" "(memberUid=$2)" "dn" | wc -l)
+    
+    #####################################
+    # Modification pour se4 :
+    # La commande ldapsearch ne semble pas fonctionner simplement avec une authentification avec kerberos
+    # La commande ldbsearch semble plus adaptée pour faire des requêtes ldap au se4 (avec une authentifcation kerberos)
+    # On commence par vérifier qu'il  n'y a qu'un seul ticket kerberos dans /tmp/
+    if [ "$(nombre_ticket_kerberos)" != '1' ]
+	then
+		return 3
+	fi
+	# On récupère le nom du ticket kerberos
+    local KRB5CCNAME
+    KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*')
+    n=$(timeout "--signal=SIGTERM" 4s ldbsearch -H "ldap://$FQDN" -b "CN=$1,OU=Groups,$BASE_DN" "(member=CN=$2,CN=Users,$BASE_DN)" \
+													--kerberos=yes --krb5-ccache="$KRB5CCNAME" | grep -E "^#.*.entries$" | cut -d ' ' -f 2)
+	# Fin de la modification pour se4												
+	#####################################
     if [ "$n" -eq "0" ]; then
         # n = 0 signifie que la recherche n'a donné aucun résultat et
         # donc le compte n'appartient pas au groupe.
@@ -674,7 +691,24 @@ function appartient_au_parc ()
     # $1 = le parc
     # $2 = le nom de machine
     local n
-    n=$(timeout "--signal=SIGTERM" 4s ldapsearch -xLLL -h "$SE3" -b "cn=$1,ou=Parcs,$BASE_DN" "(member=cn=$2,ou=Computers,$BASE_DN)" "dn" | wc -l)
+    #n=$(timeout "--signal=SIGTERM" 4s ldapsearch -xLLL -h "$SE3" -b "cn=$1,ou=Parcs,$BASE_DN" "(member=cn=$2,ou=Computers,$BASE_DN)" "dn" | wc -l)
+    #####################################
+    # Modification pour se4 :
+    # La commande ldapsearch ne semble pas fonctionner simplement avec une authentification avec kerberos
+    # La commande ldbsearch semble plus adaptée pour faire des requêtes ldap au se4 (avec une authentifcation kerberos)
+    # On commence par vérifier qu'il  n'y a qu'un seul ticket kerberos dans /tmp/
+    if [ "$(nombre_ticket_kerberos)" != '1' ]
+	then
+		return 3
+	fi
+	# On récupère le nom du ticket kerberos
+    local KRB5CCNAME
+    KRB5CCNAME=$(find /tmp/ -maxdepth 1 -mindepth 1 -type f -name 'krb5cc_*')
+    n=$(timeout "--signal=SIGTERM" 4s ldbsearch -H "ldap://$FQDN" -b "CN=$1,OU=Parcs,$BASE_DN" "(member=CN=$2,CN=Computers,$BASE_DN)" \
+													--kerberos=yes --krb5-ccache="$KRB5CCNAME" | grep -E "^#.*.entries$" | cut -d ' ' -f 2)
+	# Fin de la modification pour se4												
+	#####################################
+    
     if [ "$n" -eq "0" ]; then
         # n = 0 signifie que la recherche n'a donné aucun résultat et
         # donc la machine n'appartient pas au parc.
