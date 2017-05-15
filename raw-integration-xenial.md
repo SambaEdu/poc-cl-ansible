@@ -164,4 +164,45 @@ chown toto: -R /home/toto
 puis se connecter sur Lightdm avec comme login juste `toto`.
 
 
+Remarque : 
+Cette intégration fonctionne également pour les clients lourds ltsp à l'exception de la commande net ads join [...]
+qui ne doit pas être lancer dans le chroot sur le serveur ltsp.
+
+Pour que ltsp sur se4 soit fonctionnel, il faut :
+
+* Compléter le fichier /etc/lts.conf du chroot :
+DNS_SERVER="IP_SE4"
+SEARCH_DOMAIN="athome.priv"
+HOSTNAME="ltsp"
+TIMESERVER="IP_SE4"
+
+* Régler correctement le timezone dans le chroot :
+echo 'Europe/Paris' > /etc/timezone
+
+* Modifier pam_mount afin que le montage des partages samba du se4 se fasse avec kerberos :
+Le volume pam_mount devra être sous le format suivant :
+		user="*"
+		sgrp="lcs-users"
+        fstype="cifs"
+        server="$FQDN_SE4"
+        path="homes/Docs"
+        mountpoint="~/Docs sur le réseau"
+		options="nobrl,serverino,iocharset=utf8,sec=krb5i,cruid=%(USERUID),user=%(DOMAIN_USER)"
+		
+* Faire démarrer un client lourd sur le réseau. Se connecter avec le compte enseignant, puis passer en root 
+sur un émulateur de console et lancer la commande qui permet de joindre le client lourd au domaine se4 :
+
+net ads join -U administrator%"$ADMIN_PWD"
+
+* Copier ensuite tous les fichiers d'intégration créés sur le client lourd vers son chroot sur le serveur ltsp :
+scp '/var/lib/samba/*.tdb' root@SERVEUR_LTSP:"/opt/ltsp/i386/var/lib/samba/'
+scp '/var/lib/samba/*.ldb' root@SERVEUR_LTSP:"/opt/ltsp/i386/var/lib/samba/'
+
+* Sur le serveur ltsp, reconstruire l'image squashfs (NBD est utilisé sur Stretch):
+ltsp-update-image i386
+
+* Redémarrer le client lourd et vérifier qu'il est possible de s'identifier avec un compte du domaine se4 
+et que les partages réseau sont montés sur le bureau
+
+
 
