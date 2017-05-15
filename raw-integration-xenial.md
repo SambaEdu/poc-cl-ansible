@@ -204,5 +204,8 @@ ltsp-update-image i386
 * Redémarrer le client lourd et vérifier qu'il est possible de s'identifier avec un compte du domaine se4 
 et que les partages réseau sont montés sur le bureau
 
+* Dans le chroot, supprimer l'option HOSTNAME="ltsp" de /etc/lts.conf (sinon, tous les clients lourds en fonctionnement auront le même hostname "ltsp")
+
+
 
 
