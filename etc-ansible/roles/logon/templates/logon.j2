@@ -2059,8 +2059,6 @@ function genere_fond_ecran() {
     fi
 }
 
-
-
 function supprimer_fond_ecran() {
 
     if [ -z "$LOGIN" ]
@@ -2074,8 +2072,55 @@ function supprimer_fond_ecran() {
     fi
 }
 
+function sauvegarder_prefs_firefox() {
+# Cette fonction mémorise sur un partage Samba certains fichiers de préférences firefox de l'utilisateur
+# Elle doit être appelée pendant la phase de fermeture_perso du script de logon
 
+	# Les préférences Firefox ne sont préservées que pour les enseignants
+	if [ est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs" ]
+	then
+		# 1ère sauvegarde des préférences firefox
+		if [ ! -d "/mnt/_$LOGIN/Docs/.prefs_firefox" ]
+		then 
+			mkdir "/mnt/_$LOGIN/Docs/.prefs_firefox"
+		fi
+		# On commence par récupérer le nom du répertoire qui contient les préférences firefox de l'utilisateur
+		local DEFAULT_REP
+		DEFAULT_REP=$(grep -E "^Path=.*$" "/home/$LOGIN/.mozilla/firefox/profiles.ini" | cut -d '=' -f 2)
+		# La liste des fichiers de "personnalisation utilisateur" firefox à sauvegarder
+		# Historique et bookmark :
+		cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/places.sqlite" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
+		# Restauration des mots de passe sauvegardé par l'utilisateur :
+		cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/key3.db" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
+		cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/logins.json" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
+		# Restauration des associations pour les formats de fichiers (quelle appli utilisée pour lancer tel format de fichier ...)
+		# cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/mimeTypes.rdf" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
+		# Certificats SSL mémorisés (exeptions sur certains sites https n'ayant pas de certificat d'autorité) :
+		# cp -pf "/mnt/_$LOGIN/Docs/.pref_firefox/cert8.db" "/home/$LOGIN/"
+		# Mots rajoutés au dictonnaire :
+		# cp -pf "/mnt/_$LOGIN/Docs/.pref_firefox/persdict.dat" "/home/$LOGIN/"
+		# Préférences utilisateurs :
+		# cp -pf "/mnt/_$LOGIN/Docs/.pref_firefox/prefs.js" "/home/$LOGIN/"
+	fi
+}
 
+function restaurer_prefs_firefox() {
+# Cette fonction restaure certains fichiers de préférence utilisateur
+# Elle doit être appelée pendant la phase d'ouverture_perso du script de logon
+    # Les préférences Firefox ne sont préservées que pour les enseignants
+    if [ est_dans_liste "$LISTE_GROUPES_LOGIN" "Profs" ] && [ -d "/mnt/_$LOGIN/Docs/.prefs_firefox" ]
+    then
+		# Restauration des préférences firefox de l'enseignant qui se loggue
+		# On commence par récupérer le nom du répertoire qui contient les préférences firefox de l'utilisateur
+		local DEFAULT_REP
+		DEFAULT_REP=$(grep -E "^Path=.*$" "/home/$LOGIN/.mozilla/firefox/profiles.ini" | cut -d '=' -f 2)
+		if [ -d "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP" ]			# Un profil firefox par défaut doit exister dans le skel du se3
+		then
+			find "/mnt/_$LOGIN/Docs/.pref_firefox" 	-mindepth 1 -maxdepth 1 -type f \ 
+													-exec cp -pf {} "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/" \;
+		fi
+    fi
+}
 
 ################################################################################
 ################################################################################
@@ -2106,7 +2151,7 @@ case "$PHASE" in
         
     *)
         # On ne fait rien de spécial
-        true
+        exit 0
         ;;
 
 esac
