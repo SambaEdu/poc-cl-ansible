@@ -2096,11 +2096,11 @@ function sauvegarder_prefs_firefox() {
 		# Restauration des associations pour les formats de fichiers (quelle appli utilisée pour lancer tel format de fichier ...)
 		# cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/mimeTypes.rdf" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
 		# Certificats SSL mémorisés (exeptions sur certains sites https n'ayant pas de certificat d'autorité) :
-		# cp -pf "/mnt/_$LOGIN/Docs/.pref_firefox/cert8.db" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
+		# cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/cert8.db" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
 		# Mots rajoutés au dictonnaire :
-		# cp -pf "/mnt/_$LOGIN/Docs/.pref_firefox/persdict.dat" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
+		# cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/persdict.dat" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
 		# Préférences utilisateurs :
-		# cp -pf "/mnt/_$LOGIN/Docs/.pref_firefox/prefs.js" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
+		# cp -pf "/home/$LOGIN/.mozilla/firefox/$DEFAULT_REP/prefs.js" "/mnt/_$LOGIN/Docs/.prefs_firefox/"
 	fi
 }
 
